@@ -4,34 +4,54 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UserCreateRequest;
-use App\Providers\RouteServiceProvider;
 use App\Models\User;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use \Symfony\Component\HttpFoundation\Response;
+use App\Mail\EmailVerification;
+use App\Http\Requests\PreRegisterRequest;
+use App\Http\Requests\RegisterRequest;
+use Mail;
 
 class RegisterController extends Controller
 {
-    public function register(Request $request)
+    public function pre_register(PreRegisterRequest $request)
     {
-        $validator = Validator::make($request->all(),[
-            'name' => 'required',
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->messages(), Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'verify_code' => rand(1000, 9999),
         ]);
 
-        return response()->json("ユーザー登録完了", Response::HTTP_OK);
+        $email = new EmailVerification($user);
+        Mail::to($user->email)->send($email);
+
+        return response()->json([
+            "status" => "仮登録完了",
+            "mail_address" => $user->email,
+            "verify_code" => $user->verify_code,
+        ], Response::HTTP_OK);
+    }
+
+    public function register(RegisterRequest $request)
+    {
+        $pre_registered_user = User::where('email', $request->email)->first();
+
+        if ($request->verify_code == $pre_registered_user->verify_code) {
+            $pre_registered_user->update([
+                'verified' => true,
+            ]);
+
+            return response()->json([
+                "status" => "本登録完了",
+                "name" => $pre_registered_user->name,
+                "mail_address" => $pre_registered_user->email,
+            ], Response::HTTP_OK);
+        } else {
+            return response()->json([
+                "status" => "入力された認証コードが間違っているため本登録できません",
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
     }
 }
