@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use \Symfony\Component\HttpFoundation\Response;
 use App\Mail\EmailVerification;
 use App\Http\Requests\PreRegisterRequest;
