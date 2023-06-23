@@ -9,7 +9,7 @@ use \Symfony\Component\HttpFoundation\Response;
 use App\Mail\EmailVerification;
 use App\Http\Requests\PreRegisterRequest;
 use App\Http\Requests\RegisterRequest;
-use Mail;
+use Illuminate\Support\Facades\Mail;
 
 class RegisterController extends Controller
 {
