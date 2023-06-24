@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\Auth\ResetPasswordController;
@@ -18,8 +18,8 @@ use App\Http\Controllers\Api\Auth\ChangePasswordController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:sanctum')->group(function() {
+    Route::get('/user/account', [UserController::class, 'account']);
 });
 
 Route::post('/register', [RegisterController::class, 'register']);
