@@ -22,10 +22,12 @@ class UserController extends Controller
         }
 
         return response()->json([
+            "ID" => $user->id,
             "name" => $user->name,
             "mail_address" => $user->email,
-            "status" => $status,
+            "status" => $status . " (verified: $user->verified)",
             "created_at" => $user->created_at,
+            'updated_at' => $user->updated_at,
         ]);
     }
 }
